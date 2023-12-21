@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AMD TypeScript Example</title>
+  <script src="node_modules/requirejs/require.js"></script>
+</head>
+<body>
+  <div id="js-editor" style="height: 300px; width: 100%;"></div>
+  <div id="html-editor" style="height: 300px; width: 100%;"></div>
+  <div id="css-editor" style="height: 300px; width: 100%;"></div>
+
+  <script>
+    // Configure requirejs with the path to your bundled script
+    require.config({
+      baseUrl: './dist',
+      paths: {
+        'myModule': 'bundle'
+      }
+    });
+
+    // Load your AMD module
+    require(['myModule'], function (myModule) {
+      // Example usage of the exposed methods
+      const jsInstance = myModule.getCodeMirrorInstance('js', '#js-editor');
+      const htmlInstance = myModule.getCodeMirrorInstance('html', '#html-editor');
+      const cssInstance = myModule.getCodeMirrorInstance('css', '#css-editor');
+
+      // Use the instances as needed
+      console.log(jsInstance);
+      console.log(htmlInstance);
+      console.log(cssInstance);
+    });
+  </script>
+</body>
+</html>
