@@ -18,7 +18,7 @@ import {
   indentOnInput,
   syntaxHighlighting,
 } from "@codemirror/language";
-import { lintGutter, lintKeymap, linter } from "@codemirror/lint";
+import { LintSource, lintGutter, lintKeymap, linter,Diagnostic } from "@codemirror/lint";
 
 import { highlightSelectionMatches, searchKeymap } from "@codemirror/search";
 import {
@@ -67,35 +67,32 @@ const cssLinter = (view: any) => {
   }
   return found;
 };
-const stylelintAdapter = async (view: any): Promise<readonly Diagnostic[]> => {
+const stylelintAdapter: (view: EditorView) => Promise<readonly Diagnostic[]> = async (view) => {
   const code = view.state.doc.toString();
 
   try {
-    const result = await stylelint.lint({ code, formatter: 'json' });
-    const messages = result.results[0].warnings;
-    const found: Diagnostic[] = messages.map(message => ({
-      from: view.state.doc.line(message.line).from + message.column,
-      to: view.state.doc.line(message.line).to,
+    // Use stylelint to lint the code
+    const result = await stylelint.lint({
+      code,
+      formatter: 'json', // Specify the formatter (e.g., 'json', 'string')
+    });
+
+    // Extract linting messages from the result
+    const found: Diagnostic[] = result.results[0].warnings.map((message) => ({
+      from: view.state.doc.line(message.line - 1).from,
+      to: view.state.doc.line(message.line - 1).to,
       message: message.text,
       severity: message.severity === 'error' ? 'error' : 'warning',
-      // Include any other required properties for the Diagnostic type here
+      // Add any additional properties needed for the Diagnostic type
     }));
 
     return found;
   } catch (error) {
-    console.error('Error in stylelint adapter:', error);
+    console.error('Stylelint error:', error);
     return [];
   }
 };
 
-// Assuming Diagnostic is defined somewhere in your code or in the library's type definitions
-interface Diagnostic {
-  from: number;
-  to: number;
-  message: string;
-  severity: string;
-  // Include any other required properties for the Diagnostic type
-}
 
 export function getCodeMirrorInstance(selector: string): any {
   new EditorView({
