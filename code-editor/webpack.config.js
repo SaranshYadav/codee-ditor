@@ -2,6 +2,7 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const webpack = require('webpack'); 
+const NodePolyfillPlugin = require('node-polyfill-webpack-plugin');
 
 module.exports = {
   mode:'development',
@@ -21,6 +22,18 @@ module.exports = {
   },
   resolve: {
     extensions: ['.ts', '.js'],
+    
+      fallback: {
+        "worker_threads": false ,
+        "assert":false,
+        "path": require.resolve("path-browserify"),
+        "url": require.resolve("url/"),
+        "os": require.resolve("os-browserify/browser"),
+        "process": require.resolve("process/browser"),
+        "fs": false // Set to false if you're not using it
+        // No need to include 'browserify-module' or 'util' unless specifically required by your project
+      },
+  
   },
   module: {
     rules: [
@@ -31,26 +44,7 @@ module.exports = {
       },
     ],
   },
-  // plugins: [
-  //   new webpack.DllReferencePlugin({
-  //     manifest: require('./dist/vendor_library-manifest.json'),
-  //   }),
-  // ],
-  // plugins: [
-  //   new HtmlWebpackPlugin({
-  //     template: './src/index.html',
-  //     chunks: ['main'],
-  //     filename: 'index.html',
-  //   }),
-  //   new HtmlWebpackPlugin({
-  //     template: './src/html.html',
-  //     chunks: ['html'],
-  //     filename: 'html.html',
-  //   }),
-  //   new HtmlWebpackPlugin({
-  //     template: './src/css.html',
-  //     chunks: ['css'],
-  //     filename: 'css.html',
-  //   }),
-  // ],
+  plugins: [
+		new NodePolyfillPlugin()
+	]
 };
