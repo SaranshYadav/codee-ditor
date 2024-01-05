@@ -9,7 +9,7 @@ import { css } from "@codemirror/lang-css";
 import { EditorState } from "@codemirror/state";
 import { EditorView } from "@codemirror/view";
 import { CSSLint } from "csslint";
-
+import stylelint from 'stylelint';
 import {
   bracketMatching,
   defaultHighlightStyle,
@@ -67,6 +67,35 @@ const cssLinter = (view: any) => {
   }
   return found;
 };
+const stylelintAdapter = async (view: any): Promise<readonly Diagnostic[]> => {
+  const code = view.state.doc.toString();
+
+  try {
+    const result = await stylelint.lint({ code, formatter: 'json' });
+    const messages = result.results[0].warnings;
+    const found: Diagnostic[] = messages.map(message => ({
+      from: view.state.doc.line(message.line).from + message.column,
+      to: view.state.doc.line(message.line).to,
+      message: message.text,
+      severity: message.severity === 'error' ? 'error' : 'warning',
+      // Include any other required properties for the Diagnostic type here
+    }));
+
+    return found;
+  } catch (error) {
+    console.error('Error in stylelint adapter:', error);
+    return [];
+  }
+};
+
+// Assuming Diagnostic is defined somewhere in your code or in the library's type definitions
+interface Diagnostic {
+  from: number;
+  to: number;
+  message: string;
+  severity: string;
+  // Include any other required properties for the Diagnostic type
+}
 
 export function getCodeMirrorInstance(selector: string): any {
   new EditorView({
@@ -103,7 +132,8 @@ export function getCodeMirrorInstance(selector: string): any {
         ]),
         css(),
         lintGutter(),
-        linter(cssLinter),
+        // linter(cssLinter),
+        linter(stylelintAdapter),
       ],
     }),
   });
