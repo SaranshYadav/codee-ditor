@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AMD TypeScript Example</title>
+  <script src="node_modules/requirejs/require.js"></script>
+</head>
+<body>
+  <div id="js-editor" style="height: 300px; width: 100%;"></div>
+  <div id="html-editor" style="height: 300px; width: 100%;"></div>
+  <div id="css-editor" style="height: 300px; width: 100%;"></div>
+
+  <script>
+    // Configure requirejs with the path to your bundled script
+    require.config({
+      baseUrl: './dist',
+      paths: {
+        'myModule': 'bundle',
+        'stylelint': 'stylelint-bundle.min'
+      }
+    });
+
+    // Load your AMD module
+    require(['myModule','stylelint'], function (myModule,stylelint) {
+      // Example usage of the exposed methods
+      console.log(stylelint.lint.toString());
+      const jsInstance = myModule.getCodeMirrorInstance('js', '#js-editor',stylelint.lint);
+      const htmlInstance = myModule.getCodeMirrorInstance('html', '#html-editor',stylelint.lint);
+      const cssInstance = myModule.getCodeMirrorInstance('css', '#css-editor',stylelint.lint);
+
+      // Use the instances as needed
+      console.log(jsInstance);
+      console.log(htmlInstance);
+      console.log(cssInstance);
+    });
+  </script>
+</body>
+</html>
